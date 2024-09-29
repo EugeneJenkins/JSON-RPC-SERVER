@@ -1,0 +1,22 @@
+{
+    "name": "eugene/json-rpc-server",
+    "description": "JSON-RPC server",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "EugeneJenkins\\JsonRpcServer\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Eugene Jenkins",
+            "email": "evgheni.chiurcciu@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.1."
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.12"
+    }
+}
