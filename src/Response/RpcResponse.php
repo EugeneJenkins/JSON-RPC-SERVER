@@ -2,10 +2,17 @@
 
 namespace EugeneJenkins\JsonRpcServer\Response;
 
+use InvalidArgumentException;
+
 class RpcResponse
 {
     private const RPC_VERSION = '2.0';
 
+    /**
+     * @param mixed $result
+     * @param string|int $id
+     * @return array
+     */
     public function success(mixed $result, string|int $id): array
     {
         return $this->format([

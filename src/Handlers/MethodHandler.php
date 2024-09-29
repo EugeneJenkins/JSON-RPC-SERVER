@@ -11,6 +11,10 @@ class MethodHandler implements HandleInterface, MethodHandlerInterface
 {
     private mixed $response = [];
 
+    /**
+     * @param Closure $method
+     * @param array<string, mixed>|array<int, array<string, mixed>> $payload
+     */
     public function __construct(
         readonly private Closure $method,
         readonly private array   $payload
@@ -26,6 +30,10 @@ class MethodHandler implements HandleInterface, MethodHandlerInterface
         $id = null;
 
         ['params' => $params] = $this->payload;
+
+        if (!is_array($params)) {
+            throw new InvalidParamsException(id: $id);
+        }
 
         if (array_key_exists('id', $this->payload)) {
             $id = $this->payload['id'];

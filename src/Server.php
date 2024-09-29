@@ -12,7 +12,14 @@ use EugeneJenkins\JsonRpcServer\Exceptions\ParseErrorException;
 
 class Server
 {
+    /**
+     * @var array<string, Closure>
+     */
     private array $callbackList = [];
+
+    /**
+     * @var RpcResponse
+     */
     private RpcResponse $response;
 
     public function __construct()
@@ -38,7 +45,7 @@ class Server
             foreach ($requests as $request) {
                 $method = $this->callbackList[$request->getMethod()];
 
-                if (!empty($request->getError())){
+                if (!empty($request->getError())) {
                     $responses[] = $this->response->error(...$request->getError());
                 }
 
@@ -68,12 +75,19 @@ class Server
 
     /**
      * @throws ParseErrorException
+     * @return array<string, mixed>|array<int, array<string, mixed>>
      */
     private function getPayload(): array
     {
-        $payload = json_decode(file_get_contents('php://input'), true);
+        $json = file_get_contents('php://input');
 
-        if (empty($payload)) {
+        if (!$json) {
+            throw new ParseErrorException;
+        }
+
+        $payload = json_decode($json, true);
+
+        if (!is_array($payload)) {
             throw new ParseErrorException;
         }
 

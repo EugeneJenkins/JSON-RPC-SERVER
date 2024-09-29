@@ -9,8 +9,15 @@ use EugeneJenkins\JsonRpcServer\Exceptions\InvalidRequestException;
 
 class RequestHandler implements HandleInterface, RequestHandlerInterface
 {
+    /**
+     * @var array<int, RpcRequest>
+     */
     private array $requests;
 
+    /**
+     * @param array<string, mixed>|array<int, array<string, array>> $payload
+     * @param array<int, string> $existMethods
+     */
     public function __construct(
         readonly private array $payload,
         readonly private array $existMethods
