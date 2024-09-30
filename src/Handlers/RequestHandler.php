@@ -2,9 +2,9 @@
 
 namespace EugeneJenkins\JsonRpcServer\Handlers;
 
-use EugeneJenkins\JsonRpcServer\Exceptions\MethodNotFoundException;
-use EugeneJenkins\JsonRpcServer\Exceptions\ServerException;
 use EugeneJenkins\JsonRpcServer\Requests\RpcRequest;
+use EugeneJenkins\JsonRpcServer\Exceptions\ServerException;
+use EugeneJenkins\JsonRpcServer\Exceptions\MethodNotFoundException;
 use EugeneJenkins\JsonRpcServer\Exceptions\InvalidRequestException;
 
 class RequestHandler implements HandleInterface, RequestHandlerInterface
@@ -15,7 +15,7 @@ class RequestHandler implements HandleInterface, RequestHandlerInterface
     private array $requests;
 
     /**
-     * @param array<string, mixed>|array<int, array<string, array>> $payload
+     * @param array<mixed> $payload
      * @param array<int, string> $existMethods
      */
     public function __construct(
@@ -50,14 +50,17 @@ class RequestHandler implements HandleInterface, RequestHandlerInterface
                 'code' => $exception->getCode(),
                 'message' => $exception->getMessage(),
                 'id' => $exception->getId()
-            ]);;
+            ]);
         }
 
         return $this;
     }
 
     /**
-     * @throws InvalidRequestException|MethodNotFoundException
+     * @param array<mixed> $payload
+     * @return RpcRequest
+     * @throws InvalidRequestException
+     * @throws MethodNotFoundException
      */
     private function createRequest(array $payload): RpcRequest
     {
@@ -67,7 +70,9 @@ class RequestHandler implements HandleInterface, RequestHandlerInterface
     }
 
     /**
-     * @throws InvalidRequestException|MethodNotFoundException
+     * @param array<mixed> $payload
+     * @throws InvalidRequestException
+     * @throws MethodNotFoundException
      */
     private function validateRequest(array $payload): void
     {
