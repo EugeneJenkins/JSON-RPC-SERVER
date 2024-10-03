@@ -35,48 +35,52 @@ class RequestHandler implements HandleInterface, RequestHandlerInterface
 
     public function handle(): static
     {
-        try {
-            if (array_keys($this->payload) !== range(0, count($this->payload) - 1)) {
-                $this->requests[] = $this->createRequest($this->payload);
+        if (array_keys($this->payload) !== range(0, count($this->payload) - 1)) {
+            $this->requests[] = $this->createRequest($this->payload);
 
-                return $this;
-            }
+            return $this;
+        }
 
-            foreach ($this->payload as $item) {
-                $this->requests[] = $this->createRequest($item);
-            }
-        } catch (ServerException $exception) {
-            $this->requests[] = new RpcRequest(error: [
-                'code' => $exception->getCode(),
-                'message' => $exception->getMessage(),
-                'id' => $exception->getId()
-            ]);
+        //handle batch request
+        foreach ($this->payload as $item) {
+            $this->requests[] = $this->createRequest($item);
         }
 
         return $this;
     }
 
     /**
-     * @param array<mixed> $payload
+     * @param mixed $payload
      * @return RpcRequest
-     * @throws InvalidRequestException
-     * @throws MethodNotFoundException
      */
-    private function createRequest(array $payload): RpcRequest
+    private function createRequest(mixed $payload): RpcRequest
     {
-        $this->validateRequest($payload);
+        try {
+            $this->validateRequest($payload);
+        } catch (ServerException $exception) {
+            return new RpcRequest(error: [
+                'code' => $exception->getCode(),
+                'message' => $exception->getMessage(),
+                'id' => $exception->getId()
+            ]);
+        }
 
+        /** @var array<mixed> $payload */
         return new RpcRequest($payload);
     }
 
     /**
-     * @param array<mixed> $payload
+     * @param mixed $payload
      * @throws InvalidRequestException
      * @throws MethodNotFoundException
      */
-    private function validateRequest(array $payload): void
+    private function validateRequest(mixed $payload): void
     {
-        if (!isset($payload['method']) && !is_string($payload['method'])) {
+        if (!is_array($payload)) {
+            throw new InvalidRequestException;
+        }
+
+        if (!isset($payload['method']) || !is_string($payload['method'])) {
             throw new InvalidRequestException;
         }
 

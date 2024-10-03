@@ -29,11 +29,7 @@ class MethodHandler implements HandleInterface, MethodHandlerInterface
     {
         $id = null;
 
-        ['params' => $params] = $this->payload;
-
-        if (!is_array($params)) {
-            throw new InvalidParamsException(id: $id);
-        }
+        $params = $this->payload['params'] ?? [];
 
         if (array_key_exists('id', $this->payload)) {
             $id = $this->payload['id'];
@@ -47,13 +43,21 @@ class MethodHandler implements HandleInterface, MethodHandlerInterface
                 throw new InvalidParamsException(id: $id);
             }
 
-            foreach ($functionParameters as $parameter) {
-                if (!array_key_exists($parameter->getName(), $params)) {
-                    throw new InvalidParamsException(id: $id);
-                }
+            if (empty($params)){
+                $this->response = $reflection->invoke();
             }
 
-            $this->response = $reflection->invokeArgs($params);
+            if ($this->isNonParameterized($params)) {
+                $this->response = $reflection->invoke(...$params);
+            } else {
+                foreach ($functionParameters as $parameter) {
+                    if (!array_key_exists($parameter->getName(), $params)) {
+                        throw new InvalidParamsException(id: $id);
+                    }
+                }
+
+                $this->response = $reflection->invokeArgs($params);
+            }
 
             if (is_null($id)) {
                 $this->response = null;
@@ -68,5 +72,10 @@ class MethodHandler implements HandleInterface, MethodHandlerInterface
     public function getResponse(): mixed
     {
         return $this->response;
+    }
+
+    private function isNonParameterized(array $parameters): bool
+    {
+        return is_numeric(implode('', array_keys($parameters)));
     }
 }

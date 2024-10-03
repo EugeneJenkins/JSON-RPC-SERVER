@@ -8,7 +8,7 @@ use Throwable;
 class ServerException extends Exception
 {
     public static int $ERROR_CODE = -32000;
-    protected static string $ERROR_MASSAGE = 'Server error';
+    public static string $ERROR_MASSAGE = 'Server error';
 
     /**
      * Errors follows the JSON-RPC 2.0 specification (RFC https://www.jsonrpc.org/specification#error_object).

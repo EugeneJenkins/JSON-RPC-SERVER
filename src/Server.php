@@ -3,6 +3,7 @@
 namespace EugeneJenkins\JsonRpcServer;
 
 use Closure;
+use EugeneJenkins\JsonRpcServer\Utils\CallbackList;
 use EugeneJenkins\JsonRpcServer\Requests\RpcRequest;
 use EugeneJenkins\JsonRpcServer\Response\RpcResponse;
 use EugeneJenkins\JsonRpcServer\Handlers\MethodHandler;
@@ -11,27 +12,26 @@ use EugeneJenkins\JsonRpcServer\Handlers\RequestHandler;
 use EugeneJenkins\JsonRpcServer\Response\ServerResponse;
 use EugeneJenkins\JsonRpcServer\Exceptions\ServerException;
 use EugeneJenkins\JsonRpcServer\Exceptions\ParseErrorException;
+use Throwable;
 
 class Server
 {
-    /**
-     * @var array<string, Closure>
-     */
-    private array $callbackList = [];
+    private CallbackList $callbackList;
 
     /**
      * @var RpcResponse
      */
     private RpcResponse $response;
 
-    public function __construct()
+    public function __construct(readonly private string $payload = '')
     {
         $this->response = new RpcResponse;
+        $this->callbackList = new CallbackList;
     }
 
     public function register(string $name, Closure $callback): void
     {
-        $this->callbackList[$name] = $callback;
+        $this->callbackList->add($name, $callback);
     }
 
     public function execute(): ServerResponse
@@ -44,7 +44,7 @@ class Server
             return new ServerResponse($this->createErrorResponse($exception));
         }
 
-        $requests = (new RequestHandler($payload, array_keys($this->callbackList)))
+        $requests = (new RequestHandler($payload, $this->callbackList->getCallbackNames()))
             ->handle()
             ->getRequests();
 
@@ -54,13 +54,25 @@ class Server
     }
 
     /**
+     * @return bool|string
+     */
+    public function getPayload(): bool|string
+    {
+        if (!empty($this->payload)) {
+            return $this->payload;
+        }
+
+        return file_get_contents('php://input');
+    }
+
+    /**
      * @param RpcRequest $request
      * @return array|mixed[]
      */
     private function processRequest(RpcRequest $request): array
     {
         try {
-            $method = $this->callbackList[$request->getMethod()];
+            $method = $this->callbackList->get($request->getMethod());
 
             if (!empty($request->getError())) {
                 return $this->response->error(...$request->getError());
@@ -78,6 +90,8 @@ class Server
             return $this->response->success($response, $request->getId());
         } catch (ServerException $exception) {
             return $this->createErrorResponse($exception);
+        }catch (Throwable $exception){
+            return [];
         }
     }
 
@@ -92,13 +106,5 @@ class Server
             $exception->getMessage(),
             $exception->getId()
         );
-    }
-
-    /**
-     * @return bool|string
-     */
-    private function getPayload(): bool|string
-    {
-        return file_get_contents('php://input');
     }
 }
