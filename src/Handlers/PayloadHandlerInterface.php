@@ -2,7 +2,7 @@
 
 namespace EugeneJenkins\JsonRpcServer\Handlers;
 
-interface PayloadHandlerInterface
+interface PayloadHandlerInterface extends HandleInterface
 {
     public function setPayload(mixed $payload): static;
 }

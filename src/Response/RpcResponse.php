@@ -9,7 +9,7 @@ class RpcResponse
     /**
      * @param mixed $result
      * @param string|int|null $id
-     * @return array<>
+     * @return array<mixed>
      */
     public function success(mixed $result, string|int|null $id): array
     {
@@ -37,7 +37,7 @@ class RpcResponse
     /**
      * @param array $data
      * @param string|int|null $id
-     * @return array
+     * @return array<mixed>
      */
     private function format(array $data, string|int|null $id): array
     {

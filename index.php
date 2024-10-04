@@ -6,10 +6,6 @@ require './vendor/autoload.php';
 
 
 $subtract = function ($minuend, $subtrahend) {
-    return [
-        'minuend' => $minuend,
-        'subtrahend' => $subtrahend,
-    ];
 };
 
 $update = fn(int $a, int $b, int $c, int $d, int $e) => 1;

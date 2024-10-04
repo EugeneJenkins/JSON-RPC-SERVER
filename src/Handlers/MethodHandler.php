@@ -3,64 +3,56 @@
 namespace EugeneJenkins\JsonRpcServer\Handlers;
 
 use Closure;
+use EugeneJenkins\JsonRpcServer\Requests\RpcRequest;
 use ReflectionFunction;
 use ReflectionException;
 use EugeneJenkins\JsonRpcServer\Exceptions\InvalidParamsException;
 
 class MethodHandler implements HandleInterface
 {
-    private mixed $response = [];
 
     /**
      * @param Closure $method
-     * @param array<string, mixed>|array<int, array<string, mixed>> $payload
+     * @param RpcRequest $request
      */
     public function __construct(
-        readonly private Closure $method,
-        readonly private array   $payload
+        readonly private Closure    $method,
+        readonly private RpcRequest $request
     )
     {
     }
 
     /**
-     * @throws InvalidParamsException
+     * @throws InvalidParamsException|ReflectionException
      */
     public function handle(): mixed
     {
-        $id = null;
+        $id = $this->request->getId();
+        $params = $this->request->getParams();
 
-        $params = $this->payload['params'] ?? [];
+        $reflection = new ReflectionFunction($this->method);
 
-        if (array_key_exists('id', $this->payload)) {
-            $id = $this->payload['id'];
-        }
-
-        try {
-            $reflection = new ReflectionFunction($this->method);
-            $functionParameters = $reflection->getParameters();
-
-            if (count($functionParameters) !== count($params)) {
-                throw new InvalidParamsException(id: $id);
-            }
-
-            if (empty($params) || !is_array($params)){
-                $this->response = $reflection->invoke();
-            }
-
-            $this->response = $this->isNonParameterized($params)
-                ? $reflection->invoke(...$params)
-                : $reflection->invokeArgs($params);
-
-            if (is_null($id)) {
-                $this->response = [];
-            }
-        } catch (ReflectionException $exception) {
+        // The number of request parameters must match the number of function arguments
+        if (count($reflection->getParameters()) !== count($params)) {
             throw new InvalidParamsException(id: $id);
         }
 
-        return $this->response;
+        $responses = $this->isNonParameterized($params)
+            ? $reflection->invoke(...$params)
+            : $reflection->invokeArgs($params);
+
+        // This request serves as notification
+        if (is_null($id)) {
+            $responses = [];
+        }
+
+        return $responses;
     }
 
+    /**
+     * @param string[]|int[] $parameters
+     * @return bool
+     */
     private function isNonParameterized(array $parameters): bool
     {
         return is_numeric(implode('', array_keys($parameters)));

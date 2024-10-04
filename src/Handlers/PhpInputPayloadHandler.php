@@ -2,7 +2,7 @@
 
 namespace EugeneJenkins\JsonRpcServer\Handlers;
 
-class PhpInputPayloadHandler implements HandleInterface, PayloadHandlerInterface
+class PhpInputPayloadHandler implements PayloadHandlerInterface
 {
 
     /**

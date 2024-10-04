@@ -2,10 +2,12 @@
 
 namespace EugeneJenkins\JsonRpcServer\Handlers;
 
-use EugeneJenkins\JsonRpcServer\Exceptions\ParseErrorException;
-use EugeneJenkins\JsonRpcServer\Exceptions\ServerException;
-use EugeneJenkins\JsonRpcServer\Response\RpcResponse;
 use Throwable;
+use ReflectionException;
+use EugeneJenkins\JsonRpcServer\Response\RpcResponse;
+use EugeneJenkins\JsonRpcServer\Exceptions\ServerException;
+use EugeneJenkins\JsonRpcServer\Exceptions\ParseErrorException;
+use EugeneJenkins\JsonRpcServer\Exceptions\InvalidParamsException;
 
 class ExceptionHandler implements HandleInterface
 {
@@ -37,6 +39,13 @@ class ExceptionHandler implements HandleInterface
             return $this->response->error(
                 $throwable->getCode(),
                 $throwable->getMessage()
+            );
+        }
+
+        if ($throwable instanceof ReflectionException){
+            return $this->response->error(
+                InvalidParamsException::$ERROR_CODE,
+                InvalidParamsException::$ERROR_MASSAGE
             );
         }
 

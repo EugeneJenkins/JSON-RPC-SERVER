@@ -2,7 +2,7 @@
 
 namespace EugeneJenkins\JsonRpcServer\Handlers;
 
-class StringPayloadHandler implements HandleInterface, PayloadHandlerInterface
+class StringPayloadHandler implements PayloadHandlerInterface
 {
     private mixed $payload;
 

@@ -4,18 +4,19 @@ namespace EugeneJenkins\JsonRpcServer\Requests;
 
 class RpcRequest
 {
-    private string $method;
-    private array $params;
-    private string|int|null $id;
-
+    /**
+     * @param string $method
+     * @param string[]|int[] $params
+     * @param string|int|null $id
+     * @param string[] $error
+     */
     public function __construct(
-        readonly private array  $payload = [],
-        readonly private array $error = []
+        readonly private string          $method = '',
+        readonly private array           $params = [],
+        readonly private string|int|null $id = null,
+        readonly private array           $error = []
     )
     {
-        $this->method = $this->payload['method'] ?? '';
-        $this->params = $this->payload['params'] ?? [];
-        $this->id = $this->payload['id'] ?? null;
     }
 
     public function getMethod(): string
@@ -23,6 +24,9 @@ class RpcRequest
         return $this->method;
     }
 
+    /**
+     * @return int[]|string[]
+     */
     public function getParams(): array
     {
         return $this->params;
@@ -33,13 +37,11 @@ class RpcRequest
         return $this->id;
     }
 
+    /**
+     * @return
+     */
     public function getError(): array
     {
         return $this->error;
-    }
-
-    public function getPayload(): array
-    {
-        return $this->payload;
     }
 }
