@@ -3,16 +3,18 @@
 namespace EugeneJenkins\JsonRpcServer;
 
 use Closure;
+use Throwable;
 use EugeneJenkins\JsonRpcServer\Utils\CallbackList;
 use EugeneJenkins\JsonRpcServer\Requests\RpcRequest;
 use EugeneJenkins\JsonRpcServer\Response\RpcResponse;
 use EugeneJenkins\JsonRpcServer\Handlers\MethodHandler;
-use EugeneJenkins\JsonRpcServer\Handlers\PayloadHandler;
-use EugeneJenkins\JsonRpcServer\Handlers\RequestHandler;
 use EugeneJenkins\JsonRpcServer\Response\ServerResponse;
+use EugeneJenkins\JsonRpcServer\Handlers\RequestHandler;
+use EugeneJenkins\JsonRpcServer\Handlers\ExceptionHandler;
 use EugeneJenkins\JsonRpcServer\Exceptions\ServerException;
-use EugeneJenkins\JsonRpcServer\Exceptions\ParseErrorException;
-use Throwable;
+use EugeneJenkins\JsonRpcServer\Handlers\StringPayloadHandler;
+use EugeneJenkins\JsonRpcServer\Controllers\RequestController;
+use EugeneJenkins\JsonRpcServer\Handlers\PhpInputPayloadHandler;
 
 class Server
 {
@@ -22,11 +24,18 @@ class Server
      * @var RpcResponse
      */
     private RpcResponse $response;
+    private RequestController $controller;
+    private ExceptionHandler $exceptionHandler;
 
     public function __construct(readonly private string $payload = '')
     {
         $this->response = new RpcResponse;
         $this->callbackList = new CallbackList;
+        $this->controller = new RequestController;
+        $this->exceptionHandler = new ExceptionHandler($this->response);
+
+        $this->controller->registerHandler(new StringPayloadHandler);
+        $this->controller->registerHandler(new PhpInputPayloadHandler);
     }
 
     public function register(string $name, Closure $callback): void
@@ -37,32 +46,17 @@ class Server
     public function execute(): ServerResponse
     {
         try {
-            $payload = (new PayloadHandler($this->getPayload()))
-                ->handle()
-                ->getPayload();
-        } catch (ParseErrorException $exception) {
-            return new ServerResponse($this->createErrorResponse($exception));
+            $payload = $this->controller->handleRequest($this->payload);
+
+            $requests = (new RequestHandler($payload, $this->callbackList->getCallbackNames()))
+                ->handle();
+
+            $responses = array_map(fn($request) => $this->processRequest($request), $requests);
+        } catch (Throwable $exception) {
+            $responses = $this->exceptionHandler->setException($exception)->handle();
         }
-
-        $requests = (new RequestHandler($payload, $this->callbackList->getCallbackNames()))
-            ->handle()
-            ->getRequests();
-
-        $responses = array_map(fn($request) => $this->processRequest($request), $requests);
 
         return new ServerResponse($responses);
-    }
-
-    /**
-     * @return bool|string
-     */
-    public function getPayload(): bool|string
-    {
-        if (!empty($this->payload)) {
-            return $this->payload;
-        }
-
-        return file_get_contents('php://input');
     }
 
     /**
@@ -79,8 +73,7 @@ class Server
             }
 
             $response = (new MethodHandler($method, $request->getPayload()))
-                ->handle()
-                ->getResponse();
+                ->handle();
 
             //Notification method called
             if (!$response) {
@@ -90,7 +83,7 @@ class Server
             return $this->response->success($response, $request->getId());
         } catch (ServerException $exception) {
             return $this->createErrorResponse($exception);
-        }catch (Throwable $exception){
+        } catch (Throwable $exception) {
             return [];
         }
     }

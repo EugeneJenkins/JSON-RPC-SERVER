@@ -7,7 +7,7 @@ use ReflectionFunction;
 use ReflectionException;
 use EugeneJenkins\JsonRpcServer\Exceptions\InvalidParamsException;
 
-class MethodHandler implements HandleInterface, MethodHandlerInterface
+class MethodHandler implements HandleInterface
 {
     private mixed $response = [];
 
@@ -25,7 +25,7 @@ class MethodHandler implements HandleInterface, MethodHandlerInterface
     /**
      * @throws InvalidParamsException
      */
-    public function handle(): static
+    public function handle(): mixed
     {
         $id = null;
 
@@ -43,34 +43,21 @@ class MethodHandler implements HandleInterface, MethodHandlerInterface
                 throw new InvalidParamsException(id: $id);
             }
 
-            if (empty($params)){
+            if (empty($params) || !is_array($params)){
                 $this->response = $reflection->invoke();
             }
 
-            if ($this->isNonParameterized($params)) {
-                $this->response = $reflection->invoke(...$params);
-            } else {
-                foreach ($functionParameters as $parameter) {
-                    if (!array_key_exists($parameter->getName(), $params)) {
-                        throw new InvalidParamsException(id: $id);
-                    }
-                }
-
-                $this->response = $reflection->invokeArgs($params);
-            }
+            $this->response = $this->isNonParameterized($params)
+                ? $reflection->invoke(...$params)
+                : $reflection->invokeArgs($params);
 
             if (is_null($id)) {
-                $this->response = null;
+                $this->response = [];
             }
         } catch (ReflectionException $exception) {
             throw new InvalidParamsException(id: $id);
         }
 
-        return $this;
-    }
-
-    public function getResponse(): mixed
-    {
         return $this->response;
     }
 

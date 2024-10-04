@@ -7,10 +7,10 @@ use EugeneJenkins\JsonRpcServer\Exceptions\ServerException;
 use EugeneJenkins\JsonRpcServer\Exceptions\MethodNotFoundException;
 use EugeneJenkins\JsonRpcServer\Exceptions\InvalidRequestException;
 
-class RequestHandler implements HandleInterface, RequestHandlerInterface
+class RequestHandler implements HandleInterface
 {
     /**
-     * @var array<int, RpcRequest>
+     * @var RpcRequest[]
      */
     private array $requests;
 
@@ -26,19 +26,14 @@ class RequestHandler implements HandleInterface, RequestHandlerInterface
     }
 
     /**
-     * @return array<RpcRequest>
+     * @return RpcRequest[]
      */
-    public function getRequests(): array
-    {
-        return $this->requests;
-    }
-
-    public function handle(): static
+    public function handle(): array
     {
         if (array_keys($this->payload) !== range(0, count($this->payload) - 1)) {
             $this->requests[] = $this->createRequest($this->payload);
 
-            return $this;
+            return $this->requests;
         }
 
         //handle batch request
@@ -46,7 +41,7 @@ class RequestHandler implements HandleInterface, RequestHandlerInterface
             $this->requests[] = $this->createRequest($item);
         }
 
-        return $this;
+        return $this->requests;
     }
 
     /**
