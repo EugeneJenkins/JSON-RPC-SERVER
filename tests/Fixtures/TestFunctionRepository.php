@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Fixtures;
+namespace EugeneJenkins\JsonRpcServer\Tests\Fixtures;
 
 use Closure;
 

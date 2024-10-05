@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Utils;
+namespace EugeneJenkins\JsonRpcServer\Tests\Utils;
 
 use Closure;
 use PHPUnit\Framework\TestCase;

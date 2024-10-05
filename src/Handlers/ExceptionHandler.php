@@ -49,6 +49,8 @@ class ExceptionHandler implements HandleInterface
             );
         }
 
+        var_dump($throwable->getMessage());
+
         return $this->response->error(
             ServerException::$ERROR_CODE,
             ServerException::$ERROR_MASSAGE

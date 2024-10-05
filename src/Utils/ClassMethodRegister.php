@@ -11,7 +11,7 @@ class ClassMethodRegister
     /**
      * @var string[]
      */
-    private array $namespacesList;
+    private array $namespacesList = [];
 
     public function __construct(
         private readonly CallbackList $callbackList

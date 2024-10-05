@@ -1,14 +1,14 @@
 <?php
 
-namespace Tests;
+namespace EugeneJenkins\JsonRpcServer\Tests;
 
+use PHPUnit\Framework\TestCase;
+use EugeneJenkins\JsonRpcServer\Server;
+use EugeneJenkins\JsonRpcServer\Tests\Helper\JsonRpcTestHelper;
+use EugeneJenkins\JsonRpcServer\Exceptions\ParseErrorException;
 use EugeneJenkins\JsonRpcServer\Exceptions\InvalidRequestException;
 use EugeneJenkins\JsonRpcServer\Exceptions\MethodNotFoundException;
-use EugeneJenkins\JsonRpcServer\Exceptions\ParseErrorException;
-use EugeneJenkins\JsonRpcServer\Server;
-use Tests\Fixtures\TestFunctionRepository;
-use Tests\Helper\JsonRpcTestHelper;
-use PHPUnit\Framework\TestCase;
+use EugeneJenkins\JsonRpcServer\Tests\Fixtures\TestFunctionRepository;
 
 class ServerTest extends TestCase
 {

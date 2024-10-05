@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Helper;
+namespace EugeneJenkins\JsonRpcServer\Tests\Helper;
 
 class JsonRpcTestHelper
 {

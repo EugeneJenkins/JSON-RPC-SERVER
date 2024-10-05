@@ -1,7 +1,16 @@
 {
     "name": "eugenejenkins/json-rpc-server",
-    "description": "JSON-RPC server",
+    "description": "A lightweight JSON-RPC server implementation in PHP.",
     "type": "library",
+    "keywords": ["json-rpc", "php", "server", "rpc"],
+    "license": "MIT",
+    "homepage": "https://github.com/EugeneJenkins/json-rpc-server",
+    "authors": [
+        {
+            "name": "Eugene Jenkins",
+            "email": "evgheni.chiurcciu@gmail.com"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "EugeneJenkins\\JsonRpcServer\\": "src/"
@@ -9,15 +18,9 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "EugeneJenkins\\JsonRpcServer\\Tests\\": "tests/"
         }
     },
-    "authors": [
-        {
-            "name": "Eugene Jenkins",
-            "email": "evgheni.chiurcciu@gmail.com"
-        }
-    ],
     "require": {
         "php": ">=8.1."
     },
@@ -28,5 +31,7 @@
     "scripts": {
         "code-lint": "vendor/bin/phpstan analyse -c phpstan.neon",
         "test": "./vendor/bin/phpunit tests"
-    }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }
