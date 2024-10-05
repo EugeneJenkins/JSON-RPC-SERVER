@@ -31,18 +31,18 @@ class ExceptionHandler implements HandleInterface
     /**
      * Client readable response
      * @param Throwable $throwable
-     * @return array
+     * @return array<mixed>
      */
     private function render(Throwable $throwable): array
     {
-        if ($throwable instanceof ParseErrorException){
+        if ($throwable instanceof ParseErrorException) {
             return $this->response->error(
                 $throwable->getCode(),
                 $throwable->getMessage()
             );
         }
 
-        if ($throwable instanceof ReflectionException){
+        if ($throwable instanceof ReflectionException) {
             return $this->response->error(
                 InvalidParamsException::$ERROR_CODE,
                 InvalidParamsException::$ERROR_MASSAGE

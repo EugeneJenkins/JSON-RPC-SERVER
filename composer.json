@@ -1,5 +1,5 @@
 {
-    "name": "eugene/json-rpc-server",
+    "name": "eugenejenkins/json-rpc-server",
     "description": "JSON-RPC server",
     "type": "library",
     "autoload": {
