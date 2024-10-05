@@ -1,4 +1,4 @@
-# JSON-RPC Server
+# PHP JSON-RPC Server
 
 This project is a JSON-RPC server implemented in PHP 8.1. It adheres to the <a href="https://www.jsonrpc.org/specification" target="_blank">JSON-RPC 2.0 specification (RFC 7049)</a>. The server is built in a canonical way, following best practices for handling JSON-RPC requests.
 
@@ -27,24 +27,15 @@ This project is a JSON-RPC server implemented in PHP 8.1. It adheres to the <a h
 ## Example Usage
 
 ```php
-use EugeneJenkins\JsonRpcServer\Server;
+$server = new Server;
 
-require './vendor/autoload.php';
+$server->register('subtract', fn($minuend, $subtrahend) => $minuend - $subtrahend);
+$server->register('add', fn($a, $b) => $a + $b);
 
-$subtract = function ($minuend, $subtrahend) {
-    return [
-        'minuend' => $minuend,
-        'subtrahend' => $subtrahend,
-    ];
-};
+$server->registerClass(Calculator::class);
 
-try {
-    $server = new Server;
-    $server->register('subtract', $subtract);
-    $server->execute()->show();
-} catch (Throwable $exception) {
-    echo $exception->getMessage();
-}
+$response = $server->execute();
+$response->show();
 ```
 
 To run the server locally, you can use the built-in PHP server:
